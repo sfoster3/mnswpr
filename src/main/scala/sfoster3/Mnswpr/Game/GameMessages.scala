@@ -34,6 +34,6 @@ object GameMessages {
   sealed case class BrokerMessage(gameId: Int, message: GameMessage)
 
   /* External Board State */
-  sealed case class VisibleBoard(gameId: Int, width: Int, height: Int, remainingCount: Int, cells: Vector[(Coordinate, Cell)])
+  sealed case class VisibleBoard(gameId: Int, width: Int, height: Int, remainingCount: Int, cells: Set[(Coordinate, Cell)])
 
 }
