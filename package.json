@@ -1,0 +1,31 @@
+{
+  "name": "mnswpr",
+  "version": "1.0.0",
+  "dependencies": {
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "prop-types": "^15.7.2"
+  },
+  "devDependencies": {
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "html-webpack-plugin": "^3.2.0",
+    "html-loader": "^0.5.5",
+    "@babel/core": "^7.6.4",
+    "babel-loader": "^8.0.6",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-react": "^7.6.3",
+    "@babel/plugin-proposal-class-properties": "^7.5.5"
+  },
+  "description": "",
+  "private": true,
+  "main": "./src/main/resources/static/js/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "build-dev": "webpack --mode development"
+  },
+  "keywords": [],
+  "author": "sfoster3",
+  "license": "GPL-3.0-or-later"
+}

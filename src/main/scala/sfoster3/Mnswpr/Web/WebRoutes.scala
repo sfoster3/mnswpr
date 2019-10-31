@@ -51,11 +51,21 @@ trait WebRoutes extends JsonSupport {
 
   lazy val webRoutes: Route =
     concat(
-      // Templates
-      pathEnd {
-        get {
-          complete("Hello World")
+      // Static files
+      pathSingleSlash {
+        pathEnd {
+          get {
+            getFromResource("dist/index.html")
+          }
         }
+      },
+      get {
+        getFromResourceDirectory("dist")
+      },
+
+      //
+      pathPrefix("static") {
+        getFromResourceDirectory("dist")
       },
 
       // Api

@@ -1,4 +1,4 @@
-package sfoster3.Mnswpr.TestGameSession
+package sfoster3.Mnswpr.TestGame
 
 import akka.actor.{ActorRef, ActorSystem}
 import akka.testkit.{ImplicitSender, TestKit}

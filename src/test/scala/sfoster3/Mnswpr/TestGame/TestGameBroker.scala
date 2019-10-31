@@ -1,4 +1,4 @@
-package sfoster3.Mnswpr
+package sfoster3.Mnswpr.TestGame
 
 import akka.actor.ActorSystem
 import akka.actor.Status.Failure
