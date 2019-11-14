@@ -13,7 +13,7 @@ import sfoster3.Mnswpr.MineField.Coordinate
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-sealed case class GameStartArgs(width: Int, height: Int, count: Int, start: Coordinate)
+sealed case class GameStartArgs(width: Int, height: Int, count: Int)
 
 trait WebRoutes extends JsonSupport {
 
@@ -75,12 +75,9 @@ trait WebRoutes extends JsonSupport {
                   pathEnd {
                     post {
                       entity(as[GameStartArgs]) {
-                        case GameStartArgs(width, height, count, start) =>
-                          askBroker(
-                            Await.result((gameBroker ? CreateGame(width, height, count, start))
-                              .mapTo[GameCreated].map {
-                              case GameCreated(gameId) => gameId
-                            }, duration), Reveal(start))
+                        case GameStartArgs(width, height, count) =>
+                          val gameCreated: GameCreated = Await.result((gameBroker ? CreateGame(width, height, count)).mapTo[GameCreated], duration)
+                          complete(gameCreated)
                       }
                     }
                   },

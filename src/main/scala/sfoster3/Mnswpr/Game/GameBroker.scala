@@ -12,9 +12,9 @@ object GameBroker {
 class GameBroker extends CascadingErrorActor {
 
   private def wrapReceive(games: Map[Int, ActorRef], idx: Int): Receive = {
-    case CreateGame(width, height, count, start, seed) =>
+    case CreateGame(width, height, count, seed) =>
       val gameId = idx + 1
-      val gameSession = context.actorOf(GameSession.props(gameId, width, height, count, start, seed))
+      val gameSession = context.actorOf(GameSession.props(gameId, width, height, count, seed))
       sender() ! GameCreated(gameId)
       context.become(wrapReceive(games.updated(gameId, gameSession), gameId))
     case DeleteGame(gameId) =>

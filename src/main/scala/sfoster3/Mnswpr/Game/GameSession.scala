@@ -29,15 +29,13 @@ object GameSession {
     def apply(coordinate: Coordinate): Cell = cells.getOrElse(coordinate, UnknownCell())
   }
 
-  def props(gameId: Int, width: Int, height: Int, count: Int, start: Coordinate, seed: Option[Int] = None): Props =
-    Props(new GameSession(gameId, width, height, count, start, seed))
+  def props(gameId: Int, width: Int, height: Int, count: Int, seed: Option[Int] = None): Props =
+    Props(new GameSession(gameId, width, height, count, seed))
 }
 
-class GameSession(gameId: Int, width: Int, height: Int, count: Int, start: Coordinate, seed: Option[Int] = None) extends CascadingErrorActor {
+class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option[Int] = None) extends CascadingErrorActor {
 
-  lazy private val mineField: MineField = generateMineField
-
-  private def generateMineField: MineField = {
+  private def generateMineField(start: Coordinate): MineField = {
     val randSeed: Array[Byte] = seed.map(BigInt(_).toByteArray).getOrElse(SecureRandom.getSeed(100))
     val rand = new Random(BigInt(randSeed).toLong)
     if (count > ((width * height) / 2)) {
@@ -49,7 +47,7 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, start: Coord
     MineField(width, height, mines)
   }
 
-  private def revealAndUpdate(board: Board, coordinates: Set[Coordinate]): Unit = {
+  private def revealAndUpdate(mineField: MineField, board: Board, coordinates: Set[Coordinate]): Unit = {
     val possibleCells: Map[Coordinate, Option[Cell]] = coordinates.map {
       c =>
         c ->
@@ -81,7 +79,7 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, start: Coord
       val newCells: Map[Coordinate, Cell] = _flood(possibleCells.collect { case (co: Coordinate, Some(cell)) => co -> cell })
       val newBoard = newCells.foldLeft(board) { case (b: Board, (co: Coordinate, cell: Cell)) => b.updated(co, cell) }
       sender() ! VisibleResult(getVisibleBoard(newBoard))
-      context.become(wrapReceive(newBoard))
+      context.become(wrapReceive(Some(mineField), newBoard))
     }
   }
 
@@ -94,27 +92,30 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, start: Coord
     VisibleBoard(gameId, width, height, remaining, cells.toSet)
   }
 
-  private def wrapReceive(board: Board): Receive = {
+  private def wrapReceive(pField: Option[MineField], board: Board): Receive = {
     case Flag(coordinate) => board(coordinate) match {
       case UnknownCell() =>
         val newBoard = board.updated(coordinate, FlaggedCell())
         sender() ! VisibleResult(getVisibleBoard(newBoard))
-        context.become(wrapReceive(newBoard))
+        context.become(wrapReceive(pField, newBoard))
       case FlaggedCell() =>
         val newBoard = board.removed(coordinate)
         sender() ! VisibleResult(getVisibleBoard(newBoard))
-        context.become(wrapReceive(newBoard))
+        context.become(wrapReceive(pField, newBoard))
       case RevealedCell(_) => sender() ! VisibleResult(getVisibleBoard(board))
     }
     case Reveal(coordinate: Coordinate) => board(coordinate) match {
-      case UnknownCell() => revealAndUpdate(board, Set(coordinate))
+      case UnknownCell() =>
+        val mineField = pField.getOrElse(generateMineField(coordinate))
+        revealAndUpdate(mineField, board, Set(coordinate))
       case RevealedCell(_) | FlaggedCell() => sender() ! VisibleResult(getVisibleBoard(board))
     }
     case RevealAdj(coordinate: Coordinate) => board(coordinate) match {
       case RevealedCell(n) if n != 0 =>
+        val mineField = pField.getOrElse(generateMineField(coordinate))
         val adj = mineField.getAdj(coordinate)
         if (adj.count(a => board(a) == FlaggedCell()) == n) {
-          revealAndUpdate(board, adj.filter(a => board(a) == UnknownCell()))
+          revealAndUpdate(mineField, board, adj.filter(a => board(a) == UnknownCell()))
         } else {
           sender() ! VisibleResult(getVisibleBoard(board))
         }
@@ -123,5 +124,5 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, start: Coord
     case GetVisible() => sender() ! VisibleResult(getVisibleBoard(board))
   }
 
-  override def receive: Receive = wrapReceive(Board(Map()))
+  override def receive: Receive = wrapReceive(None, Board(Map()))
 }

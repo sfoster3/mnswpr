@@ -1,7 +1,7 @@
 package sfoster3.Mnswpr.Web
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
-import sfoster3.Mnswpr.Game.GameMessages.VisibleBoard
+import sfoster3.Mnswpr.Game.GameMessages.{GameCreated, VisibleBoard}
 import sfoster3.Mnswpr.Game.GameSession.{Cell, FlaggedCell, RevealedCell, UnknownCell}
 import sfoster3.Mnswpr.MineField.Coordinate
 import spray.json.{JsNumber, JsString, JsValue, RootJsonFormat}
@@ -12,7 +12,7 @@ trait JsonSupport extends SprayJsonSupport {
   import spray.json.DefaultJsonProtocol._
 
   implicit val coordinateJsonFormat: RootJsonFormat[Coordinate] = jsonFormat2(Coordinate)
-  implicit val gameStartArgsJsonFormat: RootJsonFormat[GameStartArgs] = jsonFormat4(GameStartArgs)
+  implicit val gameStartArgsJsonFormat: RootJsonFormat[GameStartArgs] = jsonFormat3(GameStartArgs)
 
   implicit object CellJsonFormat extends RootJsonFormat[Cell] {
     override def write(cell: Cell): JsValue = cell match {
@@ -30,4 +30,5 @@ trait JsonSupport extends SprayJsonSupport {
   }
 
   implicit val visibleBoardJsonFormat: RootJsonFormat[VisibleBoard] = jsonFormat5(VisibleBoard)
+  implicit val gameCreatedJsonFormat: RootJsonFormat[GameCreated] = jsonFormat1(GameCreated)
 }

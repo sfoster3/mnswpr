@@ -23,7 +23,7 @@ object GameMessages {
   sealed case class VisibleLoss(board: VisibleBoard, mines: Set[Coordinate]) extends GameResult
 
   /* Messages to/from GameBroker */
-  sealed case class CreateGame(width: Int, height: Int, count: Int, start: Coordinate, seed: Option[Int] = None)
+  sealed case class CreateGame(width: Int, height: Int, count: Int, seed: Option[Int] = None)
 
   sealed case class GameCreated(gameId: Int)
 

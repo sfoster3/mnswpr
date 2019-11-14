@@ -24,9 +24,9 @@ class TestGameBroker
   "A GameBroker" must {
     "create new games" in {
       val broker = system.actorOf(GameBroker.props)
-      broker ! CreateGame(10, 10, 10, Coordinate(0, 0))
+      broker ! CreateGame(10, 10, 10)
       expectMsg(GameCreated(2))
-      broker ! CreateGame(5, 5, 2, Coordinate(1, 1))
+      broker ! CreateGame(5, 5, 2)
       expectMsg(GameCreated(3))
     }
 
@@ -39,7 +39,7 @@ class TestGameBroker
 
     "forward messages" in {
       val broker = system.actorOf(GameBroker.props)
-      broker ! CreateGame(10, 10, 10, Coordinate(0, 0))
+      broker ! CreateGame(10, 10, 10)
       expectMsg(GameCreated(2))
       broker ! BrokerMessage(2, GetVisible())
       expectMsgType[VisibleResult]
@@ -47,7 +47,7 @@ class TestGameBroker
 
     "delete sessions" in {
       val broker = system.actorOf(GameBroker.props)
-      broker ! CreateGame(10, 10, 10, Coordinate(0, 0))
+      broker ! CreateGame(10, 10, 10)
       expectMsg(GameCreated(2))
       broker ! DeleteGame(2)
       expectMsg(GameDeleted(2))

@@ -19,8 +19,9 @@ class TestGameSession
     TestKit.shutdownActorSystem(system)
   }
 
-  private def getSession: ActorRef =
-    system.actorOf(GameSession.props(1, 4, 5, 6, Coordinate(1, 2), Some(100)))
+  private def getSession: ActorRef = {
+    system.actorOf(GameSession.props(1, 4, 5, 6, Some(100)))
+  }
 
   /*
   Seed 100 ->
@@ -89,15 +90,36 @@ class TestGameSession
   "A GameSession revealAdj" must {
     "reveal adjcent non-mine cells" in {
       val session = getSession
-      session ! Reveal(Coordinate(0, 2))
-      expectMsg(VisibleResult(VisibleBoard(1, 4, 5, 6, Set(Coordinate(0, 2) -> RevealedCell(1)))))
+      session ! Reveal(Coordinate(1, 2))
+      expectMsg(VisibleResult(VisibleBoard(1, 4, 5, 6, Set(Coordinate(1, 2) -> RevealedCell(4)))))
       session ! Flag(Coordinate(0, 1))
       expectMsg(VisibleResult(VisibleBoard(1, 4, 5, 5, Set(
         Coordinate(0, 1) -> FlaggedCell(),
-        Coordinate(0, 2) -> RevealedCell(1)
+        Coordinate(1, 2) -> RevealedCell(4)
       ))))
-      session ! RevealAdj(Coordinate(0, 2))
-      expectMsg(VisibleResult(VisibleBoard(1, 4, 5, 5, Set(
+      session ! Flag(Coordinate(2, 1))
+      expectMsg(VisibleResult(VisibleBoard(1, 4, 5, 4, Set(
+        Coordinate(0, 1) -> FlaggedCell(),
+        Coordinate(1, 2) -> RevealedCell(4),
+        Coordinate(2, 1) -> FlaggedCell()
+      ))))
+      session ! Flag(Coordinate(2, 2))
+      expectMsg(VisibleResult(VisibleBoard(1, 4, 5, 3, Set(
+        Coordinate(0, 1) -> FlaggedCell(),
+        Coordinate(1, 2) -> RevealedCell(4),
+        Coordinate(2, 1) -> FlaggedCell(),
+        Coordinate(2, 2) -> FlaggedCell()
+      ))))
+      session ! Flag(Coordinate(2, 3))
+      expectMsg(VisibleResult(VisibleBoard(1, 4, 5, 2, Set(
+        Coordinate(0, 1) -> FlaggedCell(),
+        Coordinate(1, 2) -> RevealedCell(4),
+        Coordinate(2, 1) -> FlaggedCell(),
+        Coordinate(2, 2) -> FlaggedCell(),
+        Coordinate(2, 3) -> FlaggedCell()
+      ))))
+      session ! RevealAdj(Coordinate(1, 2))
+      expectMsg(VisibleResult(VisibleBoard(1, 4, 5, 2, Set(
         Coordinate(0, 1) -> FlaggedCell(),
         Coordinate(0, 2) -> RevealedCell(1),
         Coordinate(0, 3) -> RevealedCell(0),
@@ -105,7 +127,10 @@ class TestGameSession
         Coordinate(1, 1) -> RevealedCell(5),
         Coordinate(1, 2) -> RevealedCell(4),
         Coordinate(1, 3) -> RevealedCell(2),
-        Coordinate(1, 4) -> RevealedCell(1)
+        Coordinate(1, 4) -> RevealedCell(1),
+        Coordinate(2, 1) -> FlaggedCell(),
+        Coordinate(2, 2) -> FlaggedCell(),
+        Coordinate(2, 3) -> FlaggedCell()
       ))))
     }
     "no-op on insufficiently flagged cells" in {
