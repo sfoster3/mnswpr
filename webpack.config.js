@@ -10,6 +10,11 @@ module.exports = {
         path: path.resolve(__dirname, 'src/main/dist'),
     },
     devtool: "source-map",
+    node: {
+        fs: 'empty',
+        net: 'empty',
+        tls: 'empty'
+    },
     module: {
         rules: [
             {

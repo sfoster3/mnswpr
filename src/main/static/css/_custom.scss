@@ -1,0 +1,47 @@
+.board {
+  .cell {
+    height: 30px;
+    width: 30px;
+    border-style: solid;
+    border-color: black;
+    border-width: thin;
+    border-spacing: 0;
+    background-color: white;
+
+    &.cell-flagged, &.cell-unknown {
+      background-color: grey;
+    }
+
+    &.cell-1 {
+      color: blue;
+    }
+
+    &.cell-2 {
+      color: darkgreen;
+    }
+
+    &.cell-3 {
+      color: darkred;
+    }
+
+    &.cell-4 {
+      color: darkblue;
+    }
+
+    &.cell-5 {
+      color: darkorange;
+    }
+
+    &.cell-6 {
+      color: darkcyan;
+    }
+
+    &.cell-7 {
+      color: black;
+    }
+
+    &.cell-8 {
+      color: darkgrey;
+    }
+  }
+}

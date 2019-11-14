@@ -1,7 +1,8 @@
 import * as React from 'React';
+import {GameArgs} from "../utils/ServerApi";
 
 interface MainMenuComponentProps {
-    startNewGame: VoidFunction
+    startNewGame(args: GameArgs): any
 }
 
 const initialState = {loading: false, height: 30, width: 30, mines: 30};
@@ -11,7 +12,8 @@ export class MainMenuComponent extends React.Component<MainMenuComponentProps, S
     state: State = initialState;
 
     clickStartNewGame() {
-        this.setState({loading: true}, () => this.props.startNewGame());
+        const {width, height, mines} = this.state;
+        this.setState({loading: true}, () => this.props.startNewGame({width, height, count: mines}));
     }
 
     onChangeWidth({target: {value: width}}: { target: { value: number } }) {
