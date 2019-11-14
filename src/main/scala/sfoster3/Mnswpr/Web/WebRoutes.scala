@@ -34,7 +34,7 @@ trait WebRoutes extends JsonSupport {
     handleGameResult((gameBroker ? BrokerMessage(gameId, message)).mapTo[GameResult])
 
   private def handleGameResult(fut: Future[GameResult]): Route = Await.result(fut, duration) match {
-    case VisibleResult(board) => complete(board)
+    case board: VisibleBoard => complete(board)
     case VisibleLoss(board, mines) =>
       gameBroker ? DeleteGame(board.gameId)
       complete("You Lose")

@@ -18,7 +18,7 @@ object GameMessages {
 
   abstract class GameResult
 
-  sealed case class VisibleResult(board: VisibleBoard) extends GameResult
+  sealed case class VisibleBoard(gameId: Int, width: Int, height: Int, remainingCount: Int, cells: Set[(Coordinate, Cell)]) extends GameResult
 
   sealed case class VisibleLoss(board: VisibleBoard, mines: Set[Coordinate]) extends GameResult
 
@@ -32,8 +32,5 @@ object GameMessages {
   sealed case class GameDeleted(gameId: Int)
 
   sealed case class BrokerMessage(gameId: Int, message: GameMessage)
-
-  /* External Board State */
-  sealed case class VisibleBoard(gameId: Int, width: Int, height: Int, remainingCount: Int, cells: Set[(Coordinate, Cell)])
 
 }

@@ -78,7 +78,7 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option
 
       val newCells: Map[Coordinate, Cell] = _flood(possibleCells.collect { case (co: Coordinate, Some(cell)) => co -> cell })
       val newBoard = newCells.foldLeft(board) { case (b: Board, (co: Coordinate, cell: Cell)) => b.updated(co, cell) }
-      sender() ! VisibleResult(getVisibleBoard(newBoard))
+      sender() ! getVisibleBoard(newBoard)
       context.become(wrapReceive(Some(mineField), newBoard))
     }
   }
@@ -96,19 +96,19 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option
     case Flag(coordinate) => board(coordinate) match {
       case UnknownCell() =>
         val newBoard = board.updated(coordinate, FlaggedCell())
-        sender() ! VisibleResult(getVisibleBoard(newBoard))
+        sender() ! getVisibleBoard(newBoard)
         context.become(wrapReceive(pField, newBoard))
       case FlaggedCell() =>
         val newBoard = board.removed(coordinate)
-        sender() ! VisibleResult(getVisibleBoard(newBoard))
+        sender() ! getVisibleBoard(newBoard)
         context.become(wrapReceive(pField, newBoard))
-      case RevealedCell(_) => sender() ! VisibleResult(getVisibleBoard(board))
+      case RevealedCell(_) => sender() ! getVisibleBoard(board)
     }
     case Reveal(coordinate: Coordinate) => board(coordinate) match {
       case UnknownCell() =>
         val mineField = pField.getOrElse(generateMineField(coordinate))
         revealAndUpdate(mineField, board, Set(coordinate))
-      case RevealedCell(_) | FlaggedCell() => sender() ! VisibleResult(getVisibleBoard(board))
+      case RevealedCell(_) | FlaggedCell() => sender() ! getVisibleBoard(board)
     }
     case RevealAdj(coordinate: Coordinate) => board(coordinate) match {
       case RevealedCell(n) if n != 0 =>
@@ -117,11 +117,11 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option
         if (adj.count(a => board(a) == FlaggedCell()) == n) {
           revealAndUpdate(mineField, board, adj.filter(a => board(a) == UnknownCell()))
         } else {
-          sender() ! VisibleResult(getVisibleBoard(board))
+          sender() ! getVisibleBoard(board)
         }
-      case RevealedCell(0) | UnknownCell() | FlaggedCell() => sender() ! VisibleResult(getVisibleBoard(board))
+      case RevealedCell(0) | UnknownCell() | FlaggedCell() => sender() ! getVisibleBoard(board)
     }
-    case GetVisible() => sender() ! VisibleResult(getVisibleBoard(board))
+    case GetVisible() => sender() ! getVisibleBoard(board)
   }
 
   override def receive: Receive = wrapReceive(None, Board(Map()))

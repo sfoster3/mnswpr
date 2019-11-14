@@ -7,8 +7,7 @@ import org.scalatest.{BeforeAndAfterAll, Matchers, WordSpecLike}
 import sfoster3.Mnswpr.Actor.Errors.NotFoundException
 import sfoster3.Mnswpr.Game.GameBroker
 import sfoster3.Mnswpr.Game.GameMessages._
-import sfoster3.Mnswpr.MineField.Coordinate
-
+import sfoster3.Mnswpr.MineField.Conversions._
 
 class TestGameBroker
   extends TestKit(ActorSystem("testSystem"))
@@ -32,7 +31,7 @@ class TestGameBroker
 
     "reject missing ids" in {
       val broker = system.actorOf(GameBroker.props)
-      broker ! BrokerMessage(10, Reveal(Coordinate(1, 1)))
+      broker ! BrokerMessage(10, Reveal(1, 1))
       val failure = expectMsgType[Failure]
       assert(failure.cause.isInstanceOf[NotFoundException])
     }
@@ -42,7 +41,7 @@ class TestGameBroker
       broker ! CreateGame(10, 10, 10)
       expectMsg(GameCreated(2))
       broker ! BrokerMessage(2, GetVisible())
-      expectMsgType[VisibleResult]
+      expectMsgType[VisibleBoard]
     }
 
     "delete sessions" in {
