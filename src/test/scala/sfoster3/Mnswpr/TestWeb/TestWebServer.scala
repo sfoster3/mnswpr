@@ -8,7 +8,7 @@ class TestWebServer extends WordSpec with Matchers with ScalatestRouteTest {
 
   "The WebServer" must {
     "serve the compiled static files" in {
-      Get("/static/placeholder.txt") ~> WebServer.webRoutes ~> check {
+      Get("/src/main/static/placeholder.txt") ~> WebServer.webRoutes ~> check {
         responseAs[String]
       }
     }

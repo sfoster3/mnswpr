@@ -4,14 +4,34 @@ const path = require('path');
 
 
 module.exports = {
-    entry: "./src/main/resources/static/ts/index.tsx",
+    entry: "./src/main/static/ts/index.tsx",
     output: {
         filename: 'main.js',
-        path: path.resolve(__dirname, 'src/main/resources/dist'),
+        path: path.resolve(__dirname, 'src/main/dist'),
     },
     devtool: "source-map",
     module: {
         rules: [
+            {
+                test: /\.(scss)$/,
+                use: [{
+                    loader: 'style-loader', // inject CSS to page
+                }, {
+                    loader: 'css-loader', // translates CSS into CommonJS modules
+                }, {
+                    loader: 'postcss-loader', // Run post css actions
+                    options: {
+                        plugins: function () { // post css plugins, can be exported to postcss.config.js
+                            return [
+                                require('precss'),
+                                require('autoprefixer')
+                            ];
+                        }
+                    }
+                }, {
+                    loader: 'sass-loader' // compiles Sass to CSS
+                }]
+            },
             {
                 test: /\.ts(x?)$/,
                 exclude: /node_modules/,
@@ -50,24 +70,18 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             title: "Mnswpr",
-            template: "./src/main/resources/templates/base.html"
+            template: "./src/main/templates/base.html"
         }),
         new HtmlWebpackExternalsPlugin({
             externals: [
                 {
                     module: 'react',
-                    entry: {
-                        path: 'https://unpkg.com/react@16/umd/react.development.js',
-                        attributes: {crossorigin: ''}
-                    },
+                    entry: 'https://unpkg.com/react@16/umd/react.development.js',
                     global: 'React',
                 },
                 {
                     module: 'react-dom',
-                    entry: {
-                        path: 'https://unpkg.com/react-dom@16/umd/react-dom.development.js',
-                        attributes: {crossorigin: ''}
-                    },
+                    entry: 'https://unpkg.com/react-dom@16/umd/react-dom.development.js',
                     global: 'ReactDOM'
                 }
             ],

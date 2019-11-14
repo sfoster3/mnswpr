@@ -35,7 +35,9 @@ trait WebRoutes extends JsonSupport {
 
   private def handleGameResult(fut: Future[GameResult]): Route = Await.result(fut, duration) match {
     case VisibleResult(board) => complete(board)
-    case VisibleLoss(board, mines) => complete("You Lose")
+    case VisibleLoss(board, mines) =>
+      gameBroker ? DeleteGame(board.gameId)
+      complete("You Lose")
   }
 
   private def actionRoute(routeName: String, getMessage: Function[Coordinate, GameMessage])(gameId: Int): Route =
@@ -55,17 +57,12 @@ trait WebRoutes extends JsonSupport {
       pathSingleSlash {
         pathEnd {
           get {
-            getFromResource("dist/index.html")
+            getFromFile("src/main/dist/index.html")
           }
         }
       },
       get {
-        getFromResourceDirectory("dist")
-      },
-
-      //
-      pathPrefix("static") {
-        getFromResourceDirectory("dist")
+        getFromDirectory("src/main/dist")
       },
 
       // Api

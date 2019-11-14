@@ -4,7 +4,10 @@
   "dependencies": {
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
-    "prop-types": "^15.7.2"
+    "prop-types": "^15.7.2",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.16.0",
+    "bootstrap": "4.3.1"
   },
   "devDependencies": {
     "webpack": "^4.20.2",
@@ -17,15 +20,28 @@
     "source-map-loader": "^0.2.4",
     "@types/react": "^16.9.11",
     "@types/react-dom": "^16.9.3",
+    "@types/prop-types": "^15.7.3",
+    "@types/jquery": "^3.3.31",
+    "@types/popper.js": "^1.11.0",
+    "@types/bootstrap": "^4.3.1",
     "@babel/core": "^7.6.4",
     "babel-loader": "^8.0.6",
     "@babel/preset-env": "^7.6.3",
     "@babel/preset-react": "^7.6.3",
-    "@babel/plugin-proposal-class-properties": "^7.5.5"
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "sass": "^1.23.2",
+    "node-sass": "^4.13.0",
+    "fibers": "^4.0.2",
+    "css-loader": "^3.2.0",
+    "sass-loader": "^8.0.0",
+    "style-loader": "^1.0.0",
+    "postcss-loader": "^3.0.0",
+    "precss": "^4.0.0",
+    "autoprefixer": "^9.7.1"
   },
   "description": "",
   "private": true,
-  "main": "src/main/resources/static/ts",
+  "main": "src/main/static/ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack --mode production",
