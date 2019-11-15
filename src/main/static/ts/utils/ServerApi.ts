@@ -28,6 +28,7 @@ export interface BoardResponse {
 
 export interface LossResponse {
     cells: Array<readonly [Coordinate, Cell]>
+    remainingCount: number
 }
 
 enum CoordinateAction {

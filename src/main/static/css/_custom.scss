@@ -1,15 +1,32 @@
 .board {
+  td {
+    padding: 0;
+  }
+
   .cell {
-    height: 30px;
-    width: 30px;
+    font-size: 1.33rem;
+    height: 2em;
+    width: 2em;
     border-style: solid;
-    border-color: black;
+    border-color: grey;
     border-width: thin;
     border-spacing: 0;
-    background-color: white;
+    background-color: lightgrey;
+    text-align: center;
+    user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
 
-    &.cell-flagged, &.cell-unknown {
-      background-color: grey;
+    &.cell-unknown {
+      border-width: thick;
+      border-style: outset;
+    }
+
+    &.cell-flagged {
+      border-width: thick;
+      border-style: outset;
+      color: darkred;
     }
 
     &.cell-1 {

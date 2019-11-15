@@ -16,16 +16,16 @@ export class MainMenuComponent extends React.Component<MainMenuComponentProps, S
         this.setState({loading: true}, () => this.props.startNewGame({width, height, count: mines}));
     }
 
-    onChangeWidth({target: {value: width}}: { target: { value: number } }) {
-        this.setState({width});
+    onChangeWidth({target: {value}}: { target: { value: string } }) {
+        this.setState({width: Number(value)});
     }
 
-    onChangeHeight({target: {value: height}}: { target: { value: number } }) {
-        this.setState({height});
+    onChangeHeight({target: {value}}: { target: { value: string } }) {
+        this.setState({height: Number(value)});
     }
 
-    onChangeMines({target: {value: mines}}: { target: { value: number } }) {
-        this.setState({mines});
+    onChangeMines({target: {value}}: { target: { value: string } }) {
+        this.setState({mines: Number(value)});
     }
 
 

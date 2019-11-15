@@ -1,6 +1,5 @@
 import * as React from "react";
 import {BoardResponse, Cell, CellTypes, LossResponse, ServerApi} from "../utils/ServerApi";
-import {ComponentUtils} from "../utils/ComponentUtils";
 
 interface GameComponentProps {
     gameId: string
@@ -20,7 +19,12 @@ class Board extends Map<string, Cell> {
 }
 
 
-const initialState: { board: Board, loading: boolean, started: boolean } = {board: new Map<string, Cell>(), loading: false, started: false};
+const initialState: { board: Board, started: boolean, count: number, lastIndex: number } = {
+    board: new Map<string, Cell>(),
+    started: false,
+    count: 0,
+    lastIndex: 0
+};
 type State = Readonly<typeof initialState>;
 
 export class GameComponent extends React.Component<GameComponentProps, State> {
@@ -31,44 +35,46 @@ export class GameComponent extends React.Component<GameComponentProps, State> {
     }
 
     clickNumber(co: Coordinate) {
+        const idx: number = +Date.now();
         const {gameId} = this.props;
-        this.setState({loading: true}, () => {
-            ServerApi.revealAdj(gameId, co).then(this.handleResponse.bind(this));
-        });
+        ServerApi.revealAdj(gameId, co).then(this.handleResponse.bind(this, idx));
     }
 
     clickUnknown(co: Coordinate) {
+        const idx: number = +Date.now();
         const {started} = this.state;
         const {gameId} = this.props;
-        this.setState({loading: true}, () => {
-            if (started) {
-                ServerApi.flag(gameId, co).then(this.handleResponse.bind(this));
-            } else {
-                ServerApi.reveal(gameId, co).then(this.handleResponse.bind(this));
-            }
-        });
+        if (started) {
+            ServerApi.flag(gameId, co).then(this.handleResponse.bind(this, idx));
+        } else {
+            ServerApi.reveal(gameId, co).then(this.handleResponse.bind(this, idx));
+        }
     }
 
     clickFlag(co: Coordinate) {
+        const idx: number = +Date.now();
         const {gameId} = this.props;
-        this.setState({loading: true}, () => {
-            ServerApi.flag(gameId, co).then(this.handleResponse.bind(this));
-        });
+        ServerApi.flag(gameId, co).then(this.handleResponse.bind(this, idx));
     }
 
-    handleResponse(response: BoardResponse | LossResponse) {
-        const {cells} = response;
-        const board: Map<string, Cell> = new Map<string, Cell>(cells.map(v => [this.mapKey(v[0]), v[1]]));
-        this.setState({board, loading: false, started: true});
+    handleResponse(requestIndex: number, response: BoardResponse | LossResponse) {
+        const {cells, remainingCount: newCount} = response;
+        const {lastIndex, board, count} = this.state;
+        let newState: State = {started: true, lastIndex, board, count};
+        if (requestIndex > lastIndex) {
+            const newBoard = new Map<string, Cell>(cells.map(v => [this.mapKey(v[0]), v[1]]));
+            newState = {...newState, board: newBoard, count: newCount, lastIndex: requestIndex};
+        }
+        this.setState(newState);
     }
 
     renderCell(cell: Cell, co: Coordinate): React.ReactFragment {
         if (typeof cell === "number") {
-            return <div className={`cell cell-${cell}`} onClick={ComponentUtils.safeClick(this, () => this.clickNumber(co))}>{cell}</div>;
+            return <div className={`cell cell-${cell}`} onClick={() => this.clickNumber(co)}>{cell || ''}</div>;
         } else if (cell === CellTypes.Flag) {
-            return <div className="cell cell-flagged" onClick={ComponentUtils.safeClick(this, () => this.clickFlag(co))}>F</div>
+            return <div className="cell cell-flagged" onClick={() => this.clickFlag(co)}>F</div>
         } else {
-            return <div className="cell cell-unknown" onClick={ComponentUtils.safeClick(this, () => this.clickUnknown(co))}/>
+            return <div className="cell cell-unknown" onClick={() => this.clickUnknown(co)}/>
         }
     }
 
@@ -79,7 +85,8 @@ export class GameComponent extends React.Component<GameComponentProps, State> {
         for (let x: number = 0; x < width; x++) {
             const column: Array<React.ReactFragment> = [];
             for (let y: number = 0; y < height; y++) {
-                const cell: Cell = board.get(this.mapKey({x, y})) || CellTypes.Unknown;
+                const k = this.mapKey({x, y});
+                const cell: Cell = board.has(k) ? board.get(k) : CellTypes.Unknown;
                 column.push(<td>{this.renderCell(cell, {x, y})}</td>);
             }
             rows.push(<tr>{column}</tr>);
@@ -88,11 +95,13 @@ export class GameComponent extends React.Component<GameComponentProps, State> {
     }
 
     render() {
-        const {gameId, exit} = this.props;
+        const {exit, count} = this.props;
+        const {count: currentCount, started} = this.state;
+        const remaining = started ? currentCount : count;
         return (
             <div>
                 <div>
-                    <span>This is game {gameId}</span>
+                    <span>{remaining} mines remaining</span>
                 </div>
                 <table className="board">
                     <tbody>
