@@ -19,11 +19,15 @@ export enum CellTypes {
     Flag = "F", Unknown = "U", Mine = "X"
 }
 
+export enum ResultTypes {
+    None = "N", Win = "W", Loss = "L"
+}
+
 export type Cell = CellTypes | number
 
 export interface ActionResponse {
     board: BoardState
-    isLoss: boolean
+    result: ResultTypes
 }
 
 export interface BoardState {

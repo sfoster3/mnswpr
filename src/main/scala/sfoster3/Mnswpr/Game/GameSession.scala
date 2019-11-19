@@ -7,7 +7,7 @@ import sfoster3.Mnswpr.Actor.CascadingErrorActor
 import sfoster3.Mnswpr.Game.GameMessages._
 import sfoster3.Mnswpr.Game.GameSession._
 import sfoster3.Mnswpr.MineField.{Coordinate, MineField}
-import sfoster3.Mnswpr.Web.APIActionResponse
+import sfoster3.Mnswpr.Web.{APIActionResponse, ResultType}
 
 import scala.util.Random
 
@@ -95,8 +95,15 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option
       case c if mineSet.contains(c) => c -> MineCell()
       case c if board(c) != UnknownCell() => c -> board(c)
     }.toMap
+    val revealedCount = cells.values.count({ case RevealedCell(_) => true case _ => false })
     val remaining = count - cells.values.count(_ == FlaggedCell())
-    APIActionResponse(VisibleBoard(gameId, width, height, remaining, cells.toSet), isLoss = mines.nonEmpty)
+    val done = mines.isEmpty && (revealedCount == (width * height) - count)
+    val result = (mines.nonEmpty, done) match {
+      case (true, _) => ResultType.Loss
+      case (false, true) => ResultType.Win
+      case (false, false) => ResultType.None
+    }
+    APIActionResponse(VisibleBoard(gameId, width, height, remaining, cells.toSet), result)
   }
 
   private def wrapReceive(pField: Option[MineField], board: Board): Receive = {

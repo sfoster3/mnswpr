@@ -4,6 +4,7 @@ import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import sfoster3.Mnswpr.Game.GameMessages.{GameCreated, VisibleBoard}
 import sfoster3.Mnswpr.Game.GameSession._
 import sfoster3.Mnswpr.MineField.Coordinate
+import sfoster3.Mnswpr.Web.ResultType.ResultType
 import spray.json.{JsNumber, JsString, JsValue, RootJsonFormat}
 
 trait JsonSupport extends SprayJsonSupport {
@@ -28,6 +29,21 @@ trait JsonSupport extends SprayJsonSupport {
       case JsNumber(n) => RevealedCell(n.toInt)
       case JsString("X") => MineCell()
       case _ => UnknownCell()
+    }
+  }
+
+  implicit object ResultTypeFormat extends RootJsonFormat[ResultType] {
+    override def write(result: ResultType): JsValue = result match {
+      case ResultType.None => JsString("N")
+      case ResultType.Win => JsString("W")
+      case ResultType.Loss => JsString("L")
+    }
+
+    override def read(json: JsValue): ResultType = json match {
+      case JsString("N") => ResultType.None
+      case JsString("W") => ResultType.Win
+      case JsString("L") => ResultType.Loss
+      case _ => ResultType.None
     }
   }
 

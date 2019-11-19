@@ -8,7 +8,7 @@ import sfoster3.Mnswpr.Game.GameSession
 import sfoster3.Mnswpr.Game.GameSession.{FlaggedCell, MineCell, RevealedCell}
 import sfoster3.Mnswpr.MineField.Conversions._
 import sfoster3.Mnswpr.MineField.Coordinate
-import sfoster3.Mnswpr.Web.APIActionResponse
+import sfoster3.Mnswpr.Web.{APIActionResponse, ResultType}
 
 import scala.language.implicitConversions
 
@@ -91,7 +91,7 @@ class TestGameSession
       session ! Reveal(1, 2)
       expectMsg(APIActionResponse(VisibleBoard(1, 4, 5, 6, Set((1, 2) -> RevealedCell(4)))))
       session ! Reveal(2, 2)
-      expectMsg(APIActionResponse(VisibleBoard(1, 4, 5, 6, Set((1, 2) -> RevealedCell(4), (2, 2) -> MineCell())), isLoss = true))
+      expectMsg(APIActionResponse(VisibleBoard(1, 4, 5, 6, Set((1, 2) -> RevealedCell(4), (2, 2) -> MineCell())), result = ResultType.Loss))
     }
   }
 
@@ -182,7 +182,18 @@ class TestGameSession
         (2, 1) -> MineCell(),
         (2, 2) -> MineCell(),
         (2, 3) -> FlaggedCell()
-      )), isLoss = true))
+      )), result = ResultType.Loss))
+    }
+    "win when revealed all non-mine cells" in {
+      val session = getSession
+      val cells = List((1,2), (0, 2), (0, 3), (0, 4), (1, 1), (1, 3), (1, 4), (2, 0), (2, 4), (3, 0), (3, 1), (3, 2), (3, 3))
+      cells.foreach {
+        cell =>
+          session ! Reveal(cell)
+          expectMsgPF[APIActionResponse]()({ case msg@APIActionResponse(_, ResultType.None) => msg })
+      }
+      session ! Reveal((3, 4))
+      expectMsgPF[APIActionResponse]()({ case msg@APIActionResponse(_, ResultType.Win) => msg })
     }
   }
 }
