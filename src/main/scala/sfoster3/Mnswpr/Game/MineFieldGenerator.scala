@@ -7,7 +7,12 @@ import sfoster3.Mnswpr.MineField.{Coordinate, MineField}
 import scala.util.Random
 
 trait MineFieldGenerator {
-  def generateMineField(start: Coordinate, width: Int, height: Int, count: Int, seed: Option[Int] = None): MineField
+  def generateMineField(start: Coordinate, width: Int, height: Int, count: Int, seed: Option[Int] = None): MineField = {
+    validateCount(width, height, count)
+    doGeneration(start, width, height, count, getRandomSeed(seed))
+  }
+
+  protected def doGeneration(start: Coordinate, width: Int, height: Int, count: Int, random: Random): MineField
 
   protected def validateCount(width: Int, height: Int, count: Int): Unit = {
     if (count > ((width * height) / 2)) {
