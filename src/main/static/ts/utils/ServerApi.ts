@@ -16,17 +16,17 @@ interface Coordinate {
 }
 
 export enum CellTypes {
-    Flag = "F", Unknown = "U"
+    Flag = "F", Unknown = "U", Mine = "X"
 }
 
 export type Cell = CellTypes | number
 
-export interface BoardResponse {
-    cells: Array<readonly [Coordinate, Cell]>
-    remainingCount: number
+export interface ActionResponse {
+    board: BoardState
+    isLoss: boolean
 }
 
-export interface LossResponse {
+export interface BoardState {
     cells: Array<readonly [Coordinate, Cell]>
     remainingCount: number
 }
@@ -48,19 +48,19 @@ export class ServerApi {
             .then((o: NewGame) => o);
     }
 
-    private static _coordinateAction(action: CoordinateAction, gameId: string, co: Coordinate): Promise<BoardResponse | LossResponse> {
+    private static _coordinateAction(action: CoordinateAction, gameId: string, co: Coordinate): Promise<ActionResponse> {
         return requestPromise.post(`/api/v1/board/${gameId}/${action}`, {body: co, json: true, baseUrl});
     }
 
-    public static reveal(gameId: string, co: Coordinate): Promise<BoardResponse | LossResponse> {
+    public static reveal(gameId: string, co: Coordinate): Promise<ActionResponse> {
         return this._coordinateAction(CoordinateAction.reveal, gameId, co);
     }
 
-    public static revealAdj(gameId: string, co: Coordinate): Promise<BoardResponse | LossResponse> {
+    public static revealAdj(gameId: string, co: Coordinate): Promise<ActionResponse> {
         return this._coordinateAction(CoordinateAction.revealAdj, gameId, co);
     }
 
-    public static flag(gameId: string, co: Coordinate): Promise<BoardResponse | LossResponse> {
+    public static flag(gameId: string, co: Coordinate): Promise<ActionResponse> {
         return this._coordinateAction(CoordinateAction.flag, gameId, co);
     }
 }

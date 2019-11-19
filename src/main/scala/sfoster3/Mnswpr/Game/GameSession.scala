@@ -7,6 +7,7 @@ import sfoster3.Mnswpr.Actor.CascadingErrorActor
 import sfoster3.Mnswpr.Game.GameMessages._
 import sfoster3.Mnswpr.Game.GameSession._
 import sfoster3.Mnswpr.MineField.{Coordinate, MineField}
+import sfoster3.Mnswpr.Web.APIActionResponse
 
 import scala.util.Random
 
@@ -20,6 +21,8 @@ object GameSession {
   sealed case class FlaggedCell() extends Cell
 
   sealed case class RevealedCell(num: Int) extends Cell
+
+  sealed case class MineCell() extends Cell
 
   private sealed case class Board(private val cells: Map[Coordinate, Cell]) {
     def updated(coordinate: Coordinate, cell: Cell): Board = Board(cells.updated(coordinate, cell))
@@ -58,7 +61,7 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option
     }.toMap
     val mines: Set[Coordinate] = possibleCells.collect { case (co: Coordinate, None) => co }.toSet
     if (mines.nonEmpty) {
-      sender() ! VisibleLoss(getVisibleBoard(board), mines)
+      sender() ! getVisibleBoard(board, Some(mines))
     } else {
       @scala.annotation.tailrec
       def _flood(cells: Map[Coordinate, Cell]): Map[Coordinate, Cell] = {
@@ -83,13 +86,17 @@ class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option
     }
   }
 
-  private def getVisibleBoard(board: Board): VisibleBoard = {
+  private def getVisibleBoard(board: Board, mines: Option[Set[Coordinate]] = None): APIActionResponse = {
+    val mineSet: Set[Coordinate] = mines.getOrElse(Set())
     val cells: Map[Coordinate, Cell] = (for {
       x <- 0 until width
       y <- 0 until height
-    } yield Coordinate(x, y)).collect { case c if board(c) != UnknownCell() => c -> board(c) }.toMap
+    } yield Coordinate(x, y)).collect {
+      case c if mineSet.contains(c) => c -> MineCell()
+      case c if board(c) != UnknownCell() => c -> board(c)
+    }.toMap
     val remaining = count - cells.values.count(_ == FlaggedCell())
-    VisibleBoard(gameId, width, height, remaining, cells.toSet)
+    APIActionResponse(VisibleBoard(gameId, width, height, remaining, cells.toSet), isLoss = mines.nonEmpty)
   }
 
   private def wrapReceive(pField: Option[MineField], board: Board): Receive = {

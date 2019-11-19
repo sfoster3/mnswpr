@@ -5,7 +5,7 @@ interface MainMenuComponentProps {
     startNewGame(args: GameArgs): any
 }
 
-const initialState = {loading: false, height: 30, width: 30, mines: 30};
+const initialState = {loading: false, height: 30, width: 30, mines: 100};
 type State = Readonly<typeof initialState>;
 
 export class MainMenuComponent extends React.Component<MainMenuComponentProps, State> {
@@ -32,7 +32,7 @@ export class MainMenuComponent extends React.Component<MainMenuComponentProps, S
     render(): React.ReactNode {
         const {loading, height, width, mines} = this.state;
         return (
-            <div>
+            <div className="main-menu">
                 <h2>Mnswpr</h2>
 
                 <div className="form-row">

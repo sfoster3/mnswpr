@@ -31,13 +31,13 @@ trait WebRoutes extends JsonSupport {
   }
 
   private def askBroker(gameId: Int, message: GameMessage): Route =
-    handleGameResult((gameBroker ? BrokerMessage(gameId, message)).mapTo[GameResult])
+    handleGameResult((gameBroker ? BrokerMessage(gameId, message)).mapTo[APIActionResponse])
 
-  private def handleGameResult(fut: Future[GameResult]): Route = Await.result(fut, duration) match {
-    case board: VisibleBoard => complete(board)
-    case VisibleLoss(board, mines) =>
+  private def handleGameResult(fut: Future[APIActionResponse]): Route = Await.result(fut, duration) match {
+    case resp@APIActionResponse(_, false) => complete(resp)
+    case resp@APIActionResponse(board, true) =>
       gameBroker ? DeleteGame(board.gameId)
-      complete("You Lose")
+      complete(resp)
   }
 
   private def actionRoute(routeName: String, getMessage: Function[Coordinate, GameMessage])(gameId: Int): Route =

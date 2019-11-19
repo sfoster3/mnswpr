@@ -8,6 +8,7 @@ import sfoster3.Mnswpr.Actor.Errors.NotFoundException
 import sfoster3.Mnswpr.Game.GameBroker
 import sfoster3.Mnswpr.Game.GameMessages._
 import sfoster3.Mnswpr.MineField.Conversions._
+import sfoster3.Mnswpr.Web.APIActionResponse
 
 class TestGameBroker
   extends TestKit(ActorSystem("testSystem"))
@@ -41,7 +42,7 @@ class TestGameBroker
       broker ! CreateGame(10, 10, 10)
       expectMsg(GameCreated(2))
       broker ! BrokerMessage(2, GetVisible())
-      expectMsgType[VisibleBoard]
+      expectMsgType[APIActionResponse]
     }
 
     "delete sessions" in {

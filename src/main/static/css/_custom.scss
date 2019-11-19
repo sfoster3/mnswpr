@@ -1,3 +1,20 @@
+.main-menu {
+  .col {
+    margin-top: auto;
+  }
+}
+
+.navbar {
+  display: flex;
+  height: 4em;
+  background-color: #e3f2fd;
+}
+
+.content {
+  display: block;
+  padding-top: 5em;
+}
+
 .board {
   td {
     padding: 0;
@@ -29,6 +46,11 @@
       color: darkred;
     }
 
+    &.cell-mine {
+      border-width: thick;
+      border-color: darkred;
+    }
+
     &.cell-1 {
       color: blue;
     }
@@ -46,7 +68,7 @@
     }
 
     &.cell-5 {
-      color: darkorange;
+      color: orangered;
     }
 
     &.cell-6 {
