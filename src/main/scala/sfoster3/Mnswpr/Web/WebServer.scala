@@ -6,7 +6,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
 import akka.util.Timeout
-import sfoster3.Mnswpr.Game.GameBroker
+import sfoster3.Mnswpr.Game.{GameBroker, SafeBufferGenerator}
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -20,7 +20,7 @@ object WebServer extends App with WebRoutes {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext: ExecutionContext = system.dispatcher
 
-  val gameBroker: ActorRef = system.actorOf(GameBroker.props, "gameBrokerActor")
+  val gameBroker: ActorRef = system.actorOf(GameBroker.props(SafeBufferGenerator), "gameBrokerActor")
 
   lazy val routes = webRoutes
 

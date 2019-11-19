@@ -23,7 +23,7 @@ class TestGameBroker
 
   "A GameBroker" must {
     "create new games" in {
-      val broker = system.actorOf(GameBroker.props)
+      val broker = system.actorOf(GameBroker.props())
       broker ! CreateGame(10, 10, 10)
       expectMsg(GameCreated(2))
       broker ! CreateGame(5, 5, 2)
@@ -31,14 +31,14 @@ class TestGameBroker
     }
 
     "reject missing ids" in {
-      val broker = system.actorOf(GameBroker.props)
+      val broker = system.actorOf(GameBroker.props())
       broker ! BrokerMessage(10, Reveal(1, 1))
       val failure = expectMsgType[Failure]
       assert(failure.cause.isInstanceOf[NotFoundException])
     }
 
     "forward messages" in {
-      val broker = system.actorOf(GameBroker.props)
+      val broker = system.actorOf(GameBroker.props())
       broker ! CreateGame(10, 10, 10)
       expectMsg(GameCreated(2))
       broker ! BrokerMessage(2, GetVisible())
@@ -46,7 +46,7 @@ class TestGameBroker
     }
 
     "delete sessions" in {
-      val broker = system.actorOf(GameBroker.props)
+      val broker = system.actorOf(GameBroker.props())
       broker ! CreateGame(10, 10, 10)
       expectMsg(GameCreated(2))
       broker ! DeleteGame(2)

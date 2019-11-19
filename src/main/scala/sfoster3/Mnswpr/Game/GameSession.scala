@@ -1,15 +1,11 @@
 package sfoster3.Mnswpr.Game
 
-import java.security.SecureRandom
-
 import akka.actor.Props
 import sfoster3.Mnswpr.Actor.CascadingErrorActor
 import sfoster3.Mnswpr.Game.GameMessages._
 import sfoster3.Mnswpr.Game.GameSession._
 import sfoster3.Mnswpr.MineField.{Coordinate, MineField}
 import sfoster3.Mnswpr.Web.{APIActionResponse, ResultType}
-
-import scala.util.Random
 
 
 object GameSession {
@@ -32,22 +28,15 @@ object GameSession {
     def apply(coordinate: Coordinate): Cell = cells.getOrElse(coordinate, UnknownCell())
   }
 
-  def props(gameId: Int, width: Int, height: Int, count: Int, seed: Option[Int] = None): Props =
-    Props(new GameSession(gameId, width, height, count, seed))
+  def props(gameId: Int, width: Int, height: Int, count: Int, seed: Option[Int] = None, generator: MineFieldGenerator = DefaultGenerator): Props =
+    Props(new GameSession(gameId, width, height, count, seed, generator))
 }
 
-class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option[Int] = None) extends CascadingErrorActor {
+class GameSession(gameId: Int, width: Int, height: Int, count: Int, seed: Option[Int] = None, generator: MineFieldGenerator = DefaultGenerator)
+  extends CascadingErrorActor {
 
   private def generateMineField(start: Coordinate): MineField = {
-    val randSeed: Array[Byte] = seed.map(BigInt(_).toByteArray).getOrElse(SecureRandom.getSeed(100))
-    val rand = new Random(BigInt(randSeed).toLong)
-    if (count > ((width * height) / 2)) {
-      throw new Exception(s"$count is too many mines for a board of ${width}x$height")
-    }
-    val mines = Iterator.continually {
-      Coordinate(rand.between(0, width - 1), rand.between(0, height - 1))
-    }.filter(_ != start).distinct.take(count).toSet
-    MineField(width, height, mines)
+    generator.generateMineField(start, width, height, count, seed)
   }
 
   private def revealAndUpdate(mineField: MineField, board: Board, coordinates: Set[Coordinate]): Unit = {
