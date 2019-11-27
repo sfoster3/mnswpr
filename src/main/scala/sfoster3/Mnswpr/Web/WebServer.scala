@@ -11,7 +11,7 @@ import sfoster3.Mnswpr.Game.{GameBroker, SafeBufferGenerator}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.io.StdIn
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 object WebServer extends App with WebRoutes {
 
@@ -24,7 +24,8 @@ object WebServer extends App with WebRoutes {
 
   lazy val routes = webRoutes
 
-  val serverBinding: Future[Http.ServerBinding] = Http().bindAndHandle(routes, "localhost", 8080)
+  val port: Int = Try(sys.env("PORT").toInt).toOption.getOrElse(8080)
+  val serverBinding: Future[Http.ServerBinding] = Http().bindAndHandle(routes, "0.0.0.0", port)
 
   serverBinding.onComplete {
     case Success(bound) =>
