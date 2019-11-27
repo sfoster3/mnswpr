@@ -3,7 +3,12 @@ package sfoster3.Mnswpr.MineField
 import scala.collection.mutable
 import scala.language.implicitConversions
 
-sealed case class Coordinate(x: Int, y: Int)
+sealed case class Coordinate(x: Int, y: Int) {
+  def getAdj: Set[Coordinate] = (for {
+    dx <- -1 to 1
+    dy <- -1 to 1
+  } yield Coordinate(x + dx, y + dy)).toSet
+}
 
 sealed case class MineField(width: Int, height: Int, mines: Map[Coordinate, Boolean]) {
 
@@ -13,13 +18,10 @@ sealed case class MineField(width: Int, height: Int, mines: Map[Coordinate, Bool
 
   def inBounds(c: Coordinate): Boolean = c.x >= 0 && c.x < width && c.y >= 0 && c.y < height
 
-  def getAdj(c: Coordinate): Set[Coordinate] = (for {
-    dx <- -1 to 1
-    dy <- -1 to 1
-  } yield Coordinate(c.x + dx, c.y + dy)).filter {
+  def getAdj(c: Coordinate): Set[Coordinate] = c.getAdj.filter {
     case Coordinate(c.x, c.y) => false
     case co => inBounds(co)
-  }.toSet
+  }
 
   def getNum(c: Coordinate): Option[Int] =
     _numCache.getOrElseUpdate(c, if (isMine(c)) None else Some(getAdj(c) count isMine))
