@@ -42,3 +42,5 @@ def runJsBuild(file: File): Int = {
 jsBuild := {
   if (runJsBuild(baseDirectory.value) != 0) throw new Exception("Something went wrong when running npm.")
 }
+
+enablePlugins(JavaAppPackaging)
