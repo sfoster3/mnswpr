@@ -5,7 +5,7 @@
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "prop-types": "^15.7.2",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.0",
     "popper.js": "^1.16.0",
     "bootstrap": "4.3.1",
     "request-promise-native": "^1.0.8"
