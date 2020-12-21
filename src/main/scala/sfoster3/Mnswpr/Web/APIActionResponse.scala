@@ -8,5 +8,7 @@ object ResultType extends Enumeration {
   val Win, Loss, None = Value
 }
 
-case class APIActionResponse(board: VisibleBoard, result: ResultType = ResultType.None)
-
+case class APIActionResponse(
+    board: VisibleBoard,
+    result: ResultType = ResultType.None
+)

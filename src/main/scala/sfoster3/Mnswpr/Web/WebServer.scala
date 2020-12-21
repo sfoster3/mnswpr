@@ -19,17 +19,16 @@ object WebServer extends App with WebRoutes {
   implicit val timeout: Timeout = Duration.create(5, TimeUnit.SECONDS)
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext: ExecutionContext = system.dispatcher
-
-  val gameBroker: ActorRef = system.actorOf(GameBroker.props(SafeBufferGenerator), "gameBrokerActor")
-
   lazy val routes = webRoutes
-
+  val gameBroker: ActorRef =
+    system.actorOf(GameBroker.props(SafeBufferGenerator), "gameBrokerActor")
   val port: Int = Try(sys.env("PORT").toInt).toOption.getOrElse(8080)
-  val serverBinding: Future[Http.ServerBinding] = Http().bindAndHandle(routes, "0.0.0.0", port)
+  val serverBinding: Future[Http.ServerBinding] =
+    Http().bindAndHandle(routes, "0.0.0.0", port)
 
   serverBinding.onComplete {
     case Success(bound) =>
-      println(s"Running at http://${bound.localAddress.getHostString}:${bound.localAddress.getPort}/")
+      println(s"Running at http://127.0.0.1:${bound.localAddress.getPort}/")
     case Failure(e) =>
       Console.err.println(s"Oh no!")
       e.printStackTrace()

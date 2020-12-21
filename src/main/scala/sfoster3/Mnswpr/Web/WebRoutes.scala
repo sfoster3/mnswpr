@@ -17,40 +17,6 @@ sealed case class GameStartArgs(width: Int, height: Int, count: Int)
 
 trait WebRoutes extends JsonSupport {
 
-  val gameBroker: ActorRef
-  implicit val timeout: Timeout
-  implicit lazy val duration: Duration = timeout.duration
-  implicit val executionContext: ExecutionContext
-
-  implicit def exceptionHandler: ExceptionHandler = ExceptionHandler {
-    case e: NotFoundException => complete(404, e.getMessage)
-    case e: Exception =>
-      e.printStackTrace()
-      complete(500, s"DEBUG; ${e.getMessage}")
-    case e => complete(500, s"Something went wrong")
-  }
-
-  private def askBroker(gameId: Int, message: GameMessage): Route =
-    handleGameResult((gameBroker ? BrokerMessage(gameId, message)).mapTo[APIActionResponse])
-
-  private def handleGameResult(fut: Future[APIActionResponse]): Route = Await.result(fut, duration) match {
-    case resp@APIActionResponse(_, ResultType.None) => complete(resp)
-    case resp@APIActionResponse(board, ResultType.Win | ResultType.Loss) =>
-      gameBroker ? DeleteGame(board.gameId)
-      complete(resp)
-  }
-
-  private def actionRoute(routeName: String, getMessage: Function[Coordinate, GameMessage])(gameId: Int): Route =
-    path(routeName) {
-      pathEnd {
-        post {
-          entity(as[Coordinate]) {
-            coordinate => askBroker(gameId, getMessage(coordinate))
-          }
-        }
-      }
-    }
-
   lazy val webRoutes: Route =
     concat(
       // Static files
@@ -64,7 +30,6 @@ trait WebRoutes extends JsonSupport {
       get {
         getFromDirectory("src/main/dist")
       },
-
       // Api
       pathPrefix("api") {
         concat(
@@ -76,7 +41,11 @@ trait WebRoutes extends JsonSupport {
                     post {
                       entity(as[GameStartArgs]) {
                         case GameStartArgs(width, height, count) =>
-                          val gameCreated: GameCreated = Await.result((gameBroker ? CreateGame(width, height, count)).mapTo[GameCreated], duration)
+                          val gameCreated: GameCreated = Await.result(
+                            (gameBroker ? CreateGame(width, height, count))
+                              .mapTo[GameCreated],
+                            duration
+                          )
                           complete(gameCreated)
                       }
                     }
@@ -90,7 +59,13 @@ trait WebRoutes extends JsonSupport {
                             askBroker(gameId, GetVisible())
                           }
                         },
-
+                        pathPrefix("solve") {
+                          pathEnd {
+                            get {
+                              askBroker(gameId, Solve())
+                            }
+                          }
+                        },
                         // POST action routes taking a coordinate
                         actionRoute("reveal", Reveal)(gameId),
                         actionRoute("flag", Flag)(gameId),
@@ -104,4 +79,44 @@ trait WebRoutes extends JsonSupport {
         )
       }
     )
+  implicit val timeout: Timeout
+  implicit lazy val duration: Duration = timeout.duration
+  implicit val executionContext: ExecutionContext
+
+  implicit def exceptionHandler: ExceptionHandler =
+    ExceptionHandler {
+      case e: NotFoundException => complete(404, e.getMessage)
+      case e: Exception =>
+        e.printStackTrace()
+        complete(500, s"DEBUG; ${e.getMessage}")
+      case e => complete(500, s"Something went wrong")
+    }
+  val gameBroker: ActorRef
+
+  private def actionRoute(
+      routeName: String,
+      getMessage: Function[Coordinate, GameMessage]
+  )(gameId: Int): Route =
+    path(routeName) {
+      pathEnd {
+        post {
+          entity(as[Coordinate]) { coordinate =>
+            askBroker(gameId, getMessage(coordinate))
+          }
+        }
+      }
+    }
+
+  private def askBroker(gameId: Int, message: GameMessage): Route =
+    handleGameResult(
+      (gameBroker ? BrokerMessage(gameId, message)).mapTo[APIActionResponse]
+    )
+
+  private def handleGameResult(fut: Future[APIActionResponse]): Route =
+    Await.result(fut, duration) match {
+      case resp @ APIActionResponse(_, ResultType.None) => complete(resp)
+      case resp @ APIActionResponse(board, ResultType.Win | ResultType.Loss) =>
+        gameBroker ? DeleteGame(board.gameId)
+        complete(resp)
+    }
 }
