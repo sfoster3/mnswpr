@@ -1,4 +1,4 @@
-import * as React from "React";
+import * as React from "react";
 import { MainMenuComponent } from "./MainMenuComponent";
 import { GameComponent } from "./GameComponent";
 import { GameArgs, ServerApi } from "../utils/ServerApi";

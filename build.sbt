@@ -75,5 +75,3 @@ jsAudit := {
 jsAuditFix := {
   if (runJsAuditFix != 0) npmError
 }
-
-enablePlugins(JavaAppPackaging)

@@ -1,6 +1,7 @@
 package sfoster3.Mnswpr.Web
 
 import akka.actor.ActorRef
+import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.PathDirectives.pathPrefix
 import akka.http.scaladsl.server.{ExceptionHandler, Route}
@@ -29,6 +30,13 @@ trait WebRoutes extends JsonSupport {
       },
       get {
         getFromDirectory("src/main/dist")
+      },
+      pathPrefix("healthz") {
+        pathEnd {
+          get {
+            complete(StatusCodes.OK)
+          }
+        }
       },
       // Api
       pathPrefix("api") {

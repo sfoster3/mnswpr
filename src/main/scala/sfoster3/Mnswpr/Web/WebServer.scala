@@ -35,8 +35,9 @@ object WebServer extends App with WebRoutes {
       system.terminate()
   }
 
-  // Wait For "ENTER"
-  StdIn.readLine()
+  // Wait For "x"
+  while (StdIn.readLine() != "x") {}
+
   // Unbind from the port and shut down when done
   serverBinding
     .flatMap(_.unbind())
